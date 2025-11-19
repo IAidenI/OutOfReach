@@ -1,0 +1,8 @@
+.vscode
+
+# Fichiers objets compilés
+*.o
+
+# Binaire final
+vulnerable
+exploit
