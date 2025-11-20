@@ -54,25 +54,29 @@ Avec exploit → vitesse augmentée → accès au texte.
 ## TODO
 **Fait**
 - Un prof of concept du projet.
+- Mettre en place un build propre :
+  - `vulnerable/` avec Makefile
+- Définir proprement la structure `Player` (position, vitesse, taille, etc.).
+- Intégrer un système de 3D en FPS dans un petit monde (caméra, déplacements, souris).
+- Ajout d'un crosshair custom
 
 
 **Urgent**
-- Mettre en place un build propre :
-  - `vulnerable/` avec Makefile
-  - `exploit/` avec Makefile
-- Définir proprement la structure `Player` (position, vitesse, taille, etc.).
-- Intégrer un système de 3D en FPS dans un petit monde (caméra, déplacements, souris).
-- Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente).
+- Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente) non contrôlé par raylib pour avoir une vitesse contrôlable par exemple.
 
 **A faire**
+- Mettre en place un build propre :
+  - `exploit/` avec Makefile
 - Ajouter un affichage debug de la vitesse du joueur (pour voir que l’exploit marche bien).
 - Gérer les collisions basiques (sol + quelques blocs).
 - Intégrer la gravité (chute, sol, éventuellement jump).
 - Créer la plateforme "Out of Reach" avec le texte en hauteur.
 - Refaire le README propre avec explication de comment résoudre le challenge
+- Menu start/end/pause
 
 
 **Optionelle**
 - Ajouter des assets sympas (sol, blocs, ciel, texture minimale).
 - Ajouter une petite UI (affichage instructions : "Atteins la plateforme en haut").
 - Ajouter du son (bruit de pas, petit son quand on atteint la zone) (pas sûr de ça).
+- Ajouter un menu paramètre où on peut changer par exemple la sensibilité, le crosshair, résolution etc...

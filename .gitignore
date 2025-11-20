@@ -3,6 +3,9 @@
 # Fichiers objets compilés
 *.o
 
-# Binaire final
-vulnerable
-exploit
+# Binaires finals
+OutOfReach
+
+# Binaires du PoC
+PoC/vulnerable
+PoC/exploit
