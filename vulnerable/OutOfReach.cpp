@@ -3,10 +3,18 @@
 int main() {
     Game game;
 
-    while (!WindowShouldClose()) {
-        game.update();
+    if (!game.init()) {
+        cerr << "Impossible de démarrer le jeu." << endl;
+        return 1;
+    }
 
-        game.handleInputs();
+    while (!WindowShouldClose()) {
+        game.handleGlobalInput();
+
+        if (!game.getPause()) {
+            game.update();
+            game.handlePlayerInputs();
+        }
 
         BeginDrawing();
             ClearBackground(RAYWHITE);

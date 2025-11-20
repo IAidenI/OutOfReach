@@ -5,7 +5,10 @@
 
 # Binaires finals
 OutOfReach
+OutOfReach.exe
 
 # Binaires du PoC
 PoC/vulnerable
+PoC/vulnerable.exe
 PoC/exploit
+PoC/exploit.exe
