@@ -1,6 +1,6 @@
 #include "game.hpp"
 
-Game::Game() : player({ 0.0f, 2.0f, 0.0f }, 5.0f, 5.0f) {
+Game::Game() : player({ 0.0f, 2.0f, 0.0f }, 5.0f, 0.6f) {
     SetConfigFlags(FLAG_MSAA_4X_HINT);
     InitWindow((int)SCREEN_WIDTH, (int)SCREEN_HEIGHT, "OutOfReach");
     SetTargetFPS(60);
@@ -28,7 +28,27 @@ bool Game::init() {
 }
 
 void Game::update() {
-    UpdateCamera(&this->camera, this->cameraMode);
+    // ---- Camera et déplacements ----
+    float dt = GetFrameTime();
+
+    // Déplacement de la caméra avec la souris
+    Vector2 mouseDelta = GetMouseDelta();
+    this->player.addRotation(mouseDelta.x, mouseDelta.y);
+
+    Position3D moveDirection = { 0.0f };
+    // Déplacement du joueur avec le clavier
+    if (IsKeyDown(KEY_W)) moveDirection = Vector3Add(moveDirection, this->player.forward());
+    if (IsKeyDown(KEY_S)) moveDirection = Vector3Add(moveDirection, this->player.backward());
+    if (IsKeyDown(KEY_D)) moveDirection = Vector3Add(moveDirection, this->player.right());
+    if (IsKeyDown(KEY_A)) moveDirection = Vector3Add(moveDirection, this->player.left());
+
+    // Mets a jour le déplacement
+    if (Vector3Length(moveDirection) > 0.1f) moveDirection = Vector3Normalize(moveDirection);
+    this->player.move(moveDirection, dt);
+
+    // Mets a jours la caméra
+    this->camera.position = this->player.getPosition();
+    this->camera.target = Vector3Add(this->player.getPosition(), this->player.forward());
 }
 
 void Game::handleGlobalInput() {
@@ -39,7 +59,7 @@ void Game::handleGlobalInput() {
 }
 
 void Game::handlePlayerInputs() {
-    if (IsKeyPressed(KEY_Q)) this->displayAxies = !this->displayAxies;
+    if (IsKeyPressed(KEY_Q)) this->displayDebug = !this->displayDebug;
 
     if (IsKeyPressed(KEY_ONE)) this->cameraMode = CAMERA_FREE;
 
@@ -64,7 +84,7 @@ void Game::drawCrossAir() {
 // AXE Y (vert)
 // AXE Z (bleu)
 void Game::drawArrowAxies(Position3D plan, float size) {
-    if (!this->displayAxies) return;
+    if (!this->displayDebug) return;
     
     // ---- AXE X (rouge) ----
     DrawLine3D(plan, { plan.x + size, plan.y, plan.z }, RED);
@@ -174,7 +194,7 @@ void Game::drawTextCodepoint3D(Font font, int codepoint, Vector3 position, float
         const float tw = (srcRec.x+srcRec.width)/font.texture.width;
         const float th = (srcRec.y+srcRec.height)/font.texture.height;
 
-        if (this->SHOW_LETTER_BOUNDRY) DrawCubeWiresV((Vector3){ position.x + width/2, position.y - height/2, position.z }, (Vector3){ width, height, LETTER_BOUNDRY_SIZE }, LETTER_BOUNDRY_COLOR);
+        if (this->displayDebug) DrawCubeWiresV((Vector3){ position.x + width/2, position.y - height/2, position.z }, (Vector3){ width, height, LETTER_BOUNDRY_SIZE }, LETTER_BOUNDRY_COLOR);
 
         rlCheckRenderBatchLimit(4 + 4*backface);
         rlSetTexture(font.texture.id);

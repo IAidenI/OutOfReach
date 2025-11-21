@@ -24,9 +24,8 @@ class Game {
         int cameraMode = CAMERA_FIRST_PERSON;
         int crosshairMode = 0;
 
-        bool displayAxies = false;
+        bool displayDebug = false;
         bool pause = false;
-        bool SHOW_LETTER_BOUNDRY = false;
     public:
         Game();
         bool init();
