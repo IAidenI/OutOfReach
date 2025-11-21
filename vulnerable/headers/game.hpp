@@ -31,6 +31,7 @@ class Game {
         bool init();
 
         bool getPause() const { return this->pause; }
+        Player& getPlayer() { return this->player; }
 
         void update();
 

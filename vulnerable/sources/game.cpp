@@ -11,7 +11,7 @@ Game::Game() : player({ 0.0f, 2.0f, 0.0f }, 5.0f, 0.6f) {
 bool Game::init() {
     if (!this->manager.init()) {
         cerr << "[FATAL] Manager invalide : ressources manquantes." << endl;
-        return false;
+        return false;   
     }
 
     this->camera = {
@@ -71,6 +71,16 @@ void Game::handlePlayerInputs() {
 
     if (IsKeyPressed(KEY_C)) {
         this->player.getCrosshair().nextShape();
+    }
+
+    if (IsKeyPressed(KEY_B)) {
+        printf("Changement de position\n");
+        this->player.setPosition({ 10.0f, 5.0f, 3.0f });
+            printf(" --- Player ---\n");
+    printf("   Position :\n");
+    printf("      X = %.2f\n", this->player.getPosition().x);
+    printf("      Y = %.2f\n", this->player.getPosition().y);
+    printf("      Z = %.2f\n\n", this->player.getPosition().z);
     }
 }
 

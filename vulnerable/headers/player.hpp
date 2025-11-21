@@ -14,7 +14,9 @@ class Player {
     public:
         Player(Position3D position, float speed, float sensitivity);
 
-        Position3D getPosition() const { return this->position; }
+        void setPosition(Position3D position) { this->position = position; }
+
+        Position3D& getPosition() { return this->position; }
         float getSpeed() const { return this->speed; }
         float getSensitivity() const { return this->sensitivity; }
         Vector2 getRotation() const { return this->rotation; }
