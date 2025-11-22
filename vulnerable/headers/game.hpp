@@ -21,7 +21,6 @@ class Game {
 
         Player player;
         Camera3D camera;
-        int cameraMode = CAMERA_FIRST_PERSON;
         int crosshairMode = 0;
 
         bool displayDebug = false;

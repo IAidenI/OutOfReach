@@ -55,24 +55,29 @@ Avec exploit → vitesse augmentée → accès au texte.
 **Fait**
 - Un prof of concept du projet.
 - Mettre en place un build propre :
+  - `exploit/` avec Makefile
   - `vulnerable/` avec Makefile
 - Définir proprement la structure `Player` (position, vitesse, taille, etc.).
 - Intégrer un système de 3D en FPS dans un petit monde (caméra, déplacements, souris).
 - Ajout d'un crosshair custom
+- Créer la plateforme "Out of Reach" avec le texte en hauteur.
+- Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente) non contrôlé par raylib pour avoir une vitesse contrôlable par exemple.
+- Première version du principe de l'application
 
 
 **Urgent**
-- Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente) non contrôlé par raylib pour avoir une vitesse contrôlable par exemple.
+- Afficher un hud ou des informations dans le décor avec les commandes importantes
+- Ajouter un affichage debug de la vitesse, position etc... du joueur (pour voir que l’exploit marche bien).
+- Menu start/end/pause
+- Menu de settings
+- Faire un IHM pour l'exploit avec GTK
+
 
 **A faire**
-- Mettre en place un build propre :
-  - `exploit/` avec Makefile
-- Ajouter un affichage debug de la vitesse du joueur (pour voir que l’exploit marche bien).
+- Refaire le README propre avec explication de comment résoudre le challenge
+- Améliorer le monde (ajouter des collisions au bord, des objet etc...)
 - Gérer les collisions basiques (sol + quelques blocs).
 - Intégrer la gravité (chute, sol, éventuellement jump).
-- Créer la plateforme "Out of Reach" avec le texte en hauteur.
-- Refaire le README propre avec explication de comment résoudre le challenge
-- Menu start/end/pause
 
 
 **Optionelle**
@@ -80,3 +85,4 @@ Avec exploit → vitesse augmentée → accès au texte.
 - Ajouter une petite UI (affichage instructions : "Atteins la plateforme en haut").
 - Ajouter du son (bruit de pas, petit son quand on atteint la zone) (pas sûr de ça).
 - Ajouter un menu paramètre où on peut changer par exemple la sensibilité, le crosshair, résolution etc...
+- Si réalisable faire des interaction avec des bloc (un peu comme supraland), pouvoir déplacer, tourner des blocs

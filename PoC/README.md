@@ -8,7 +8,7 @@ Ce dossier contient un **Proof of Concept** démontrant la possibilité de modif
 
 Deux fichiers sont fournis :
 
-- `vulnerable.c` : un programme "victime" à exécuter.
+- `vulnerable.cpp` : un programme "victime" à exécuter.
 - `exploit.c` : un programme "attaquant" exploitant la vulnérabilité.
 
 ## Compilation
@@ -16,8 +16,8 @@ Deux fichiers sont fournis :
 Compilez les fichiers comme suit :
 
 ```bash
-gcc vulnerable.c -Wall -o vulnerable
-gcc vulnerable_raylib.c -Wall -lraylib -o vulnerable // Version plus visuelle avec raylib
+g++ vulnerable.cpp -Wall -o vulnerable
+g++ vulnerable_raylib.cpp -Wall -lraylib -o vulnerable // Version plus visuelle avec raylib
                                                      // Commandes :
                                                      //    - ZQSD : Déplacements
                                                      //    - F    : Affiche les informations du joueur

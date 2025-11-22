@@ -23,9 +23,9 @@ void Player::move(Position3D direction, float dt) {
 
 Position3D Player::forward() {
     return {
-        cosf(DEG2RAD * rotation.y) * sinf(DEG2RAD * rotation.x),
-        sinf(DEG2RAD * rotation.y),
-        cosf(DEG2RAD * rotation.y) * cosf(DEG2RAD * rotation.x) 
+        sinf(DEG2RAD * rotation.x),
+        0,
+        cosf(DEG2RAD * rotation.x) 
     };
 }
 
@@ -45,4 +45,12 @@ Position3D Player::right() {
 Position3D Player::left()  {
     Vector3 r = this->right();
     return { -r.x, -r.y, -r.z };
+}
+
+Position3D Player::forwardCamera() {
+    return {
+        cosf(DEG2RAD * rotation.y) * sinf(DEG2RAD * rotation.x),
+        sinf(DEG2RAD * rotation.y),
+        cosf(DEG2RAD * rotation.y) * cosf(DEG2RAD * rotation.x) 
+    };
 }

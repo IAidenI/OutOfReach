@@ -14,9 +14,10 @@ bool Game::init() {
         return false;   
     }
 
+    this->player.setRotation({ 180.0f, 0.0f }); 
     this->camera = {
         .position = this->player.getPosition(),
-        .target = { this->player.getPosition().x, this->player.getPosition().y, this->player.getPosition().z - 1.0f },
+        .target = Vector3Add(this->player.getPosition(), this->player.forwardCamera()),
         .up = { 0.0f, 10.0f, 0.0f },
         .fovy = 90.0f,
         .projection = CAMERA_PERSPECTIVE
@@ -48,7 +49,7 @@ void Game::update() {
 
     // Mets a jours la caméra
     this->camera.position = this->player.getPosition();
-    this->camera.target = Vector3Add(this->player.getPosition(), this->player.forward());
+    this->camera.target = Vector3Add(this->player.getPosition(), this->player.forwardCamera());
 }
 
 void Game::handleGlobalInput() {
@@ -61,33 +62,15 @@ void Game::handleGlobalInput() {
 void Game::handlePlayerInputs() {
     if (IsKeyPressed(KEY_Q)) this->displayDebug = !this->displayDebug;
 
-    if (IsKeyPressed(KEY_ONE)) this->cameraMode = CAMERA_FREE;
-
-    if (IsKeyPressed(KEY_TWO)) this->cameraMode = CAMERA_FIRST_PERSON;
-
-    if (IsKeyPressed(KEY_THREE)) cameraMode = CAMERA_THIRD_PERSON;
-
-    if (IsKeyPressed(KEY_FOUR)) this->cameraMode = CAMERA_ORBITAL;
-
     if (IsKeyPressed(KEY_C)) {
         this->player.getCrosshair().nextShape();
     }
 
-    if (IsKeyPressed(KEY_B)) {
-        printf("Changement de position\n");
-        this->player.setPosition({ 10.0f, 5.0f, 3.0f });
-            printf(" --- Player ---\n");
-    printf("   Position :\n");
-    printf("      X = %.2f\n", this->player.getPosition().x);
-    printf("      Y = %.2f\n", this->player.getPosition().y);
-    printf("      Z = %.2f\n\n", this->player.getPosition().z);
-    }
+    if (IsKeyPressed(KEY_B)) this->player.setPosition({ 10.0f, 5.0f, 3.0f });
 }
 
 void Game::drawCrossAir() {
-    if (this->cameraMode != CAMERA_THIRD_PERSON) {
-        this->player.getCrosshair().draw();
-    }
+    this->player.getCrosshair().draw();
 }
 
 // AXE X (rouge)
@@ -145,7 +128,7 @@ void Game::drawLevel() {
         DrawPlane(start, size, LIGHTGRAY);
         this->drawArrowAxies(start);
 
-        // Dessine un block d'exemple
+        // Dessine un bloc d'exemple
         Size3D blockSize = { 4.0f, 50.0f, 4.0f };
         Position3D blockPosition = { start.x, blockSize.y / 2.0f, start.y - (blockSize.z + 3.0f) };
         DrawCubeV(blockPosition, blockSize, DARKBLUE);
@@ -164,12 +147,6 @@ void Game::drawLevel() {
         };
         this->drawSign(message, signPosition);
         this->drawArrowAxies(signPosition);
-
-        // Draw player cube
-        if (cameraMode == CAMERA_THIRD_PERSON) {
-            DrawCube(camera.target, 0.5f, 0.5f, 0.5f, PURPLE);
-            DrawCubeWires(camera.target, 0.5f, 0.5f, 0.5f, DARKPURPLE);
-        }
     EndMode3D();
 }
 
