@@ -18,7 +18,7 @@ class Player {
 
         Position3D& getPosition() { return this->position; }
         float getSpeed() const { return this->speed; }
-        float getSensitivity() const { return this->sensitivity; }
+        float& getSensitivity() { return this->sensitivity; }
         Position2D getRotation() const { return this->rotation; }
         Crosshair& getCrosshair() { return this->crosshair; }
 

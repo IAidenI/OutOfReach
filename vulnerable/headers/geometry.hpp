@@ -32,4 +32,7 @@ inline constexpr float   DEFAULT_ROUNDNESS     = 0.12f;
 inline constexpr int     DEFAULT_SEGMENTS      = 32;
 inline constexpr float   DEFAULT_STROKE        = 2.0f;
 
+inline constexpr float   DEFAULT_BORDER_THICK  = 5.0f;
+inline constexpr float   DEFAULT_ARROW_SIZE    = 40.0f;
+
 #endif // GEOMETRY_HPP

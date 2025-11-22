@@ -42,17 +42,26 @@ bool Manager::init() {
     for (char32_t ch : FR_CHARS) cps.push_back((int)ch);
     
     for (int i = 0; i < FONT_MAX; ++i) {
-        fmgr[i][0] = LoadFontEx(this->fonts[i], SMALL_SIZE, cps.data(), cps.size());
-        SetTextureFilter(fmgr[i][0].texture, TEXTURE_FILTER_BILINEAR);
-
-        fmgr[i][1] = LoadFontEx(this->fonts[i], BIG_SIZE, cps.data(), cps.size());
-        SetTextureFilter(fmgr[i][1].texture, TEXTURE_FILTER_BILINEAR);
+        for (int j = 0; j < FONT_SIZE_COUNT; ++j) {
+            this->fmgr[i][j] = LoadFontEx(this->fonts[i], FONT_SIZES[j], cps.data(), cps.size());
+            SetTextureFilter(this->fmgr[i][j].texture, TEXTURE_FILTER_BILINEAR);
+        }
     }
     return this->valid;
 }
 
 const Font& Manager::getFont(FontID id, int size) {
-    int index = (size < SMALL_SIZE) ? 0 : 1;
+    int index = 0;
+
+    // Cherche la première taille >= size
+    for (int i = 0; i < FONT_SIZE_COUNT; ++i) {
+        if (FONT_SIZES[i] >= size) {
+            index = i;
+            break;
+        }
+        index = i; // si aucune >= size, on garde la dernière
+    }
+
     return this->fmgr[id][index];
 }
 

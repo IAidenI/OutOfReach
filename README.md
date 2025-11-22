@@ -63,13 +63,13 @@ Avec exploit → vitesse augmentée → accès au texte.
 - Créer la plateforme "Out of Reach" avec le texte en hauteur.
 - Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente) non contrôlé par raylib pour avoir une vitesse contrôlable par exemple.
 - Première version du principe de l'application
+- Menu start/pause
 
 
 **Urgent**
 - Afficher un hud ou des informations dans le décor avec les commandes importantes
 - Ajouter un affichage debug de la vitesse, position etc... du joueur (pour voir que l’exploit marche bien).
-- Menu start/end/pause
-- Menu de settings
+- Menu de settings (en cours)
 - Faire un IHM pour l'exploit avec GTK
 
 
@@ -78,6 +78,7 @@ Avec exploit → vitesse augmentée → accès au texte.
 - Améliorer le monde (ajouter des collisions au bord, des objet etc...)
 - Gérer les collisions basiques (sol + quelques blocs).
 - Intégrer la gravité (chute, sol, éventuellement jump).
+- Rendre le texte illisible en reverse
 
 
 **Optionelle**
