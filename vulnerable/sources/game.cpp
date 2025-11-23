@@ -1,9 +1,9 @@
 #include "game.hpp"
 
-Game::Game() : player({ 0.0f, 2.0f, 0.0f }, 5.0f, 0.6f) {
+Game::Game() : player({ 0.0f, 20.0f, 0.0f }, 20.0f, 0.6f) {
     SetConfigFlags(FLAG_WINDOW_UNDECORATED | FLAG_MSAA_4X_HINT);
     InitWindow(GetMonitorWidth(0), GetMonitorHeight(0), GAME_NAME);
-    SetTargetFPS(60);
+    SetTargetFPS(targetFps);
     SetExitKey(KEY_NULL);
 }
 
@@ -57,7 +57,7 @@ void Game::render() {
 
         switch (state) {
             case State::StartMenu:    this->drawMenuStart();    break;
-            case State::Playing:      this->drawCrossAir();     break;
+            case State::Playing:      this->drawHUD();          break;
             case State::SettingsMenu: this->drawMenuSettings(); break;
             case State::Paused:       this->drawMenuPause();    break;
             default: break;
@@ -106,7 +106,14 @@ void Game::update() {
 
     // Déplacement de la caméra avec la souris
     Vector2 mouseDelta = GetMouseDelta();
-    this->player.addRotation(mouseDelta.x, mouseDelta.y);
+
+    static Position2D smoothDelta = { 0.0f, 0.0f };
+    float mouseSmooth = 0.4f;
+
+    smoothDelta.x = smoothDelta.x * mouseSmooth + mouseDelta.x * (1.0f - mouseSmooth);
+    smoothDelta.y = smoothDelta.y * mouseSmooth + mouseDelta.y * (1.0f - mouseSmooth);
+
+    this->player.addRotation(smoothDelta.x, smoothDelta.y);
 
     Position3D moveDirection = { 0.0f };
     // Déplacement du joueur avec le clavier
@@ -178,25 +185,13 @@ void Game::drawMenuStart() {
 }
 
 void Game::drawMenuSettings() {
-    vector<MenuEntry> buttons = {
-        { "Retour", MenuAction::Resume }
-    };
-
-    Color bg = (previousState() == State::StartMenu) ? COLOR_MENU_START_BACKGROUND : COLOR_MENU_PAUSE_BACKGROUND;
-    //MenuAction clicked = this->drawMenu("Paramètres", bg, buttons);
-    MenuAction clicked = this->settingsTemp(bg);
-
-    if (clicked == MenuAction::Back) this->back();
-}
-
-Game::MenuAction Game::settingsTemp(Color background) {
-    DrawRectangle(0, 0, (int)this->screenWidth, (int)this->screenHeight, background);
+    DrawRectangle(0, 0, (int)this->screenWidth, (int)this->screenHeight, (previousState() == State::StartMenu) ? COLOR_MENU_START_BACKGROUND : COLOR_MENU_PAUSE_BACKGROUND);
     
     // --- Calcul du titre ---
     TextStyle title = {
-        .font = &this->manager.getFont(INFO_FONT, (int)MENU_TITLE_SIZE),
+        .font = &this->manager.getFont(INFO_FONT, (int)DEFAULT_MENU_TITLE_SIZE),
         .text = "Paramètres",
-        .fontSize = MENU_TITLE_SIZE,
+        .fontSize = DEFAULT_MENU_TITLE_SIZE,
         .spacing = 2.0f,
         .lineSpacing = 1.0f,
         .color = COLOR_MENU_TITLE
@@ -207,9 +202,9 @@ Game::MenuAction Game::settingsTemp(Color background) {
 
     // --- Calcul de la taille du bouton ---
     TextStyle btnBackText = {
-        .font = &this->manager.getFont(INFO_FONT, (int)MENU_BUTTON_SIZE),
+        .font = &this->manager.getFont(INFO_FONT, (int)DEFAULT_MENU_BUTTON_SIZE),
         .text = "Retour",
-        .fontSize = MENU_BUTTON_SIZE,
+        .fontSize = DEFAULT_MENU_BUTTON_SIZE,
         .spacing = 2.0f,
         .lineSpacing = 1.0f,
         .color = COLOR_MENU_BUTTON_TEXT
@@ -244,14 +239,20 @@ Game::MenuAction Game::settingsTemp(Color background) {
         slidBarSize.x,
         slidBarSize.y
     };
+    Rectangle fpsBounds = {
+        center.x - slidBarSize.x / 2.0f,
+        fovBounds.y + slidBarSize.y + slidBarPadY,
+        slidBarSize.x,
+        slidBarSize.y
+    };
 
     TextStyle leftText = {
         .font = &this->manager.getFont(INFO_FONT, 40),
-        .text = "Sensi",
+        .text = "Sensibilité",
         .fontSize = 40.0f,
         .spacing = 2.0f,
         .lineSpacing = 1.0f,
-        .color = BLACK
+        .color = COLOR_MENU_TEXT
     };
     TextStyle rightText = {
         .font = &this->manager.getFont(INFO_FONT, 40),
@@ -259,23 +260,27 @@ Game::MenuAction Game::settingsTemp(Color background) {
         .fontSize = 40.0f,
         .spacing = 2.0f,
         .lineSpacing = 1.0f,
-        .color = BLACK
+        .color = COLOR_MENU_TEXT
     };
     GuiSliderBar(sensibilityBounds, leftText, rightText, &this->player.getSensitivity(), 0.1f, 2.0f, COLOR_MENU_BUTTON_BORDER);
     leftText.text  = "FOV";
     rightText.text = TextFormat("%.0f°", this->camera.fovy);
     GuiSliderBar(fovBounds, leftText, rightText, &this->camera.fovy, 30.0f, 120.0f, COLOR_MENU_BUTTON_BORDER);
+    leftText.text  = "FPS";
+    rightText.text = TextFormat("%.0f°", this->targetFps);
+    GuiSliderBar(fpsBounds, leftText, rightText, &this->targetFps, 0.0f, 400.0f, COLOR_MENU_BUTTON_BORDER);
+    if (this->targetFps < 1.0f) SetTargetFPS(0); // 0 = pas de limite (infini)
+    else SetTargetFPS((int)this->targetFps);
 
     // --- Affichage du boutton ---
     Position2D btnBackPosition = {
         center.x - btnBackSize.x / 2.0f,
-        sensibilityBounds.y + sensibilityBounds.y + 30.0f
+        fpsBounds.y + fpsBounds.height + slidBarPadY
     };
     ButtonResult result = DrawMenuButton(btnBackText, btnBackPosition);
 
-    MenuAction clicked = MenuAction::None;
-    if (result.pressed) clicked = MenuAction::Back;
-    return clicked;
+    if (result.pressed) this->back();
+    this->handCursor = result.hover;
 }
 
 Game::MenuAction Game::drawMenu(const char *titleText, Color background, const vector<MenuEntry>& buttons) {
@@ -290,9 +295,9 @@ Game::MenuAction Game::drawMenu(const char *titleText, Color background, const v
     
     // --- Calcul du titre ---
     TextStyle title = {
-        .font = &this->manager.getFont(INFO_FONT, (int)MENU_TITLE_SIZE),
+        .font = &this->manager.getFont(INFO_FONT, (int)DEFAULT_MENU_TITLE_SIZE),
         .text = titleText,
-        .fontSize = MENU_TITLE_SIZE,
+        .fontSize = DEFAULT_MENU_TITLE_SIZE,
         .spacing = 2.0f,
         .lineSpacing = 1.0f,
         .color = COLOR_MENU_TITLE
@@ -306,9 +311,9 @@ Game::MenuAction Game::drawMenu(const char *titleText, Color background, const v
     float totalButtonHeight = 0;
     for (auto& button : buttons) {
         TextStyle text = {
-            .font = &this->manager.getFont(INFO_FONT, (int)MENU_BUTTON_SIZE),
+            .font = &this->manager.getFont(INFO_FONT, (int)DEFAULT_MENU_BUTTON_SIZE),
             .text = button.label,
-            .fontSize = MENU_BUTTON_SIZE,
+            .fontSize = DEFAULT_MENU_BUTTON_SIZE,
             .spacing = 2.0f,
             .lineSpacing = 1.0f,
             .color = COLOR_MENU_BUTTON_TEXT
@@ -329,13 +334,14 @@ Game::MenuAction Game::drawMenu(const char *titleText, Color background, const v
     DrawTextStyled(title, titlePosition);
 
     // --- Affichage des bouttons ---
+    bool anyHover = false;
     MenuAction clicked = MenuAction::None;
     float currentY = titlePosition.y + titleSize.y + titlePadY;
     for (size_t i = 0; i < buttons.size(); i++) {
         TextStyle buttonText = {
-            .font = &this->manager.getFont(INFO_FONT, (int)MENU_BUTTON_SIZE),
+            .font = &this->manager.getFont(INFO_FONT, (int)DEFAULT_MENU_BUTTON_SIZE),
             .text = buttons[i].label,
-            .fontSize = MENU_BUTTON_SIZE,
+            .fontSize = DEFAULT_MENU_BUTTON_SIZE,
             .spacing = 2.0f,
             .lineSpacing = 1.0f,
             .color = COLOR_MENU_BUTTON_TEXT
@@ -347,16 +353,51 @@ Game::MenuAction Game::drawMenu(const char *titleText, Color background, const v
 
         ButtonResult result = DrawMenuButton(buttonText, buttonPosition);
         if (result.pressed) clicked = buttons[i].action;
+        if (result.hover)   anyHover = true;
 
         currentY += buttonsSize[i].y + buttonPadY;
     }
+    this->handCursor = anyHover;
 
     return clicked;
 }
 
 // ---- HUD ----
-void Game::drawCrossAir() {
+void Game::drawHUD() {
     this->player.getCrosshair().draw();
+
+    TextStyle title = {
+        .font = &this->manager.getFont(INFO_FONT, 45),
+        .text = "Joueur",
+        .fontSize = 45.0f,
+        .spacing = 2.0f,
+        .lineSpacing = 1.0f,
+        .color = COLOR_INFO_PANEL_TITLE
+    };
+
+    InfoPanel contentPosition = {
+        .subTitle = MakeInfoText(this->manager, 30, "Position", COLOR_INFO_PANEL_SUB_TITLE),
+        .values = {
+            MakeInfoText(this->manager, 26, TextFormat("X : %.2f", this->player.getPosition().x), COLOR_INFO_PANEL_VALUE),
+            MakeInfoText(this->manager, 26, TextFormat("Y : %.2f", this->player.getPosition().y), COLOR_INFO_PANEL_VALUE),
+            MakeInfoText(this->manager, 26, TextFormat("Z : %.2f", this->player.getPosition().z), COLOR_INFO_PANEL_VALUE)
+        }
+    };
+
+    InfoPanel contentSpeed = {
+        .subTitle = MakeInfoText(this->manager, 30, "Vitesse", COLOR_INFO_PANEL_SUB_TITLE),
+        .values = {
+            MakeInfoText(this->manager, 26, TextFormat("%.2f", this->player.getSpeed()), COLOR_INFO_PANEL_VALUE)
+        }
+    };
+
+    InfoPanel contentSensibility = {
+        .subTitle = MakeInfoText(this->manager, 30, "Sensibilité", COLOR_INFO_PANEL_SUB_TITLE),
+        .values = {
+            MakeInfoText(this->manager, 26, TextFormat("%.2f", this->player.getSensitivity()), COLOR_INFO_PANEL_VALUE)
+        }
+    };
+    DrawInfoPanel(title, { contentPosition, contentSpeed, contentSensibility }, { 30.0f, 20.0f });
 }
 
 // ---- Monde ----
@@ -376,7 +417,7 @@ void Game::drawSign(TextStyle& message, Position3D origin, Padding padIn, Color 
     Position3D panelPosition = origin;
     panelPosition.y += poleHeight + panelSize.y / 2.0f;
     DrawCubeV(panelPosition, panelSize, color);
-    this->drawArrowAxies(panelPosition);
+    this->drawArrowAxies(panelPosition, 3.0f);
     
     // Texte
     Position3D textPos = {
@@ -385,7 +426,7 @@ void Game::drawSign(TextStyle& message, Position3D origin, Padding padIn, Color 
         panelPosition.z + panelSize.z / 2.0f + 0.001f
     };
     this->drawText3D(message, textPos, false);
-    this->drawArrowAxies(textPos);
+    this->drawArrowAxies(textPos, 3.0f);
 }
 
 // AXE X (rouge)
@@ -410,17 +451,15 @@ void Game::drawArrowAxies(Position3D plan, float size) {
 void Game::drawLevel() {
     BeginMode3D(this->camera);
         // Dessine le sol
-        Position3D start = { 0.0f, 0.0f, 0.0f };
-        Size2D size = { 32.0f, 32.0f };
-        DrawPlane(start, size, LIGHTGRAY);
-        this->drawArrowAxies(start);
+        DrawPlane(WORLD_CENTER, WORLD_SIZE, LIGHTGRAY);
+        this->drawArrowAxies(WORLD_CENTER);
 
-        // Dessine un bloc d'exemple
-        Size3D blockSize = { 4.0f, 50.0f, 4.0f };
-        Position3D blockPosition = { start.x, blockSize.y / 2.0f, start.y - (blockSize.z + 3.0f) };
+        // Dessine la tour du flag
+        Size3D blockSize = { 4.0f, 100.0f, 4.0f };
+        Position3D blockPosition = { WORLD_CENTER.x, blockSize.y / 2.0f, WORLD_CENTER.y - blockSize.z - 20.0f };
         DrawCubeV(blockPosition, blockSize, DARKBLUE);
         DrawCubeWiresV(blockPosition, blockSize, BLUE);
-        this->drawArrowAxies(blockPosition, 6.0f);
+        this->drawArrowAxies(blockPosition);
 
         // Dessine un panneau
         Position3D signPosition = { blockPosition.x, blockPosition.y + blockSize.y / 2.0f, blockPosition.z };
@@ -433,7 +472,7 @@ void Game::drawLevel() {
             .color = BLACK
         };
         this->drawSign(message, signPosition);
-        this->drawArrowAxies(signPosition);
+        this->drawArrowAxies(signPosition, 3.0f);
     EndMode3D();
 }
 

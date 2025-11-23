@@ -86,46 +86,32 @@ ButtonResult DrawMenuButton(const TextStyle& message, Position2D position, Paddi
 }
 
 void GuiSliderBar(Rectangle bounds, const TextStyle& textLeft, const TextStyle& textRight, float *value, float minValue, float maxValue, Color color) {    
-    float pad = 20.0f; // espace entre texte et barre
+    float padText = 20.0f; // espace entre texte et barre
     float borderThick = 3.0f;
 
     // --- Calcul des tailles des textes
-    TextStyle maxTextRight = textRight;
-    maxTextRight.text = to_string(maxValue).size() > to_string(minValue).size();
     Size2D leftSize  = MeasureTextStyled(textLeft);
-    Size2D rightSize = MeasureTextStyled(maxTextRight);
-
-    float totalTextWidth = leftSize.x + pad + rightSize.x;
-    float sliderWidth    = bounds.width - totalTextWidth - pad;
-
-    if (sliderWidth < 20) sliderWidth = 20;
+    Size2D rightSize = MeasureTextStyled(textRight);
 
     float centerY = bounds.y + bounds.height / 2.0f;
 
     // --- Positionnement des textes ---
     // Texte gauche
     Position2D leftPos = {
-        bounds.x,
+        bounds.x - leftSize.x - padText,
         centerY - leftSize.y / 2.0f
     };
     DrawTextStyled(textLeft, leftPos);
 
     // Texte droite
     Position2D rightPos = {
-        bounds.x + bounds.width - rightSize.x,
+        bounds.x + bounds.width + padText,
         centerY - rightSize.y / 2.0f
     };
     DrawTextStyled(textRight, rightPos);
 
     // --- Positionnement de la barre ---
-    Rectangle sliderBounds = {
-        leftPos.x + leftSize.x + pad,
-        bounds.y + 5,
-        sliderWidth,
-        bounds.height - 10
-    };
-
-    // Cadre
+    Rectangle sliderBounds = bounds;
     DrawRectangleLinesEx(sliderBounds, borderThick, color);
 
     // --- Calcul de la position du curseur ---
@@ -137,13 +123,22 @@ void GuiSliderBar(Rectangle bounds, const TextStyle& textLeft, const TextStyle& 
     Rectangle cursorBounds = {
         sliderBounds.x + borderThick,
         sliderBounds.y + borderThick,
-        t * sliderBounds.width - 2.0f * borderThick,
+        t * (sliderBounds.width - 2.0f * borderThick),
         sliderBounds.height - 2.0f * borderThick
     };
     DrawRectangleRec(cursorBounds, Darken(color));
 
     // --- Interaction souris ---
-    if ((IsMouseButtonDown(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), sliderBounds))) {
+    static float *activeSlide = nullptr;
+    Position2D mouse = GetMousePosition();
+
+    // On commence à drag que si le clic démarre dans la barre
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(mouse, sliderBounds)) activeSlide = value;
+
+    // On arrête de drag à la fin du clic
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) activeSlide = nullptr;
+
+    if (activeSlide == value) {
         float mouseRel = GetMouseX() - sliderBounds.x;
         float percent = mouseRel / sliderBounds.width;
 
@@ -151,5 +146,102 @@ void GuiSliderBar(Rectangle bounds, const TextStyle& textLeft, const TextStyle& 
         if (percent > 1) percent = 1;
 
         *value = minValue + percent * (maxValue - minValue);
+    }
+}
+
+void DrawInfoPanel(const TextStyle& title, const vector<InfoPanel>& content, Padding padIn, float roundness, int segments) {
+    // ---- Calcul de la taille ----
+    Size2D titleSize = MeasureTextStyled(title);
+
+    float separatorPadY   = 10.0f;
+    float separatorHeight = 3.0f;
+
+    float maxContentWidth = 0.0f;
+    float totalContentHeight = 0.0f;
+
+    float valuePadX = padIn.x + 10.0f;
+
+    // Mesure du contenu
+    for (const auto& c : content) {
+        Size2D subtitleSize = MeasureTextStyled(c.subTitle);
+
+        // Mesure des valeurs
+        float lineWidth = 0.0f;
+        float lineHeight = 0.0f;
+
+        for (const auto& v : c.values) {
+            Size2D vSize = MeasureTextStyled(v);
+            lineWidth  += vSize.x + valuePadX;
+            lineHeight = fmaxf(lineHeight, vSize.y);
+        }
+
+        // Largeur du bloc
+        float blockWidth = fmaxf(subtitleSize.x, valuePadX + lineWidth);
+        maxContentWidth  = fmaxf(maxContentWidth, blockWidth);
+
+        // Hauteur du bloc
+        float blockHeight = subtitleSize.y + c.subTitle.lineSpacing + lineHeight + c.subTitle.lineSpacing;
+        totalContentHeight += blockHeight;
+    }
+
+    // Taille final
+    float frameWidth  = fmaxf(titleSize.x, maxContentWidth) + 2.0f * padIn.x;
+    float frameHeight = padIn.y + titleSize.y + separatorPadY + separatorHeight + separatorPadY + totalContentHeight + padIn.y;
+    Frame frame = {
+        10.0f,     // En haut a gauche
+        10.0f,     // 
+        frameWidth,
+        frameHeight
+    };
+
+    // Le fond
+    DrawRectangleRounded(frame, roundness, segments, COLOR_INFO_PANEL_BACKGROUND);
+    
+    // Le titre
+    Position2D titlePosition = {
+        frame.x + frame.width / 2.0f - titleSize.x / 2.0f,
+        frame.y + padIn.y
+    };
+    DrawTextStyled(title, titlePosition);
+
+    // La barre
+    Rectangle separatorPosition = {
+        frame.x + padIn.x,
+        titlePosition.y + titleSize.y + separatorPadY,
+        frame.width - 2.0f * padIn.x,
+        separatorHeight
+    };
+    DrawRectangleRounded(separatorPosition, 1.0f, segments, COLOR_INFO_PANEL_SEPARATOR_LINE);
+
+    // Le contenu
+    Position2D subtitlePosition = {
+        frame.x + padIn.x,
+        separatorPosition.y + separatorPosition.height + separatorPadY
+    };
+
+    for (const auto& c : content) {
+        // Sous-titre
+        Size2D subtitleSize = MeasureTextStyled(c.subTitle);
+        DrawTextStyled(c.subTitle, subtitlePosition);
+
+        // Position de départ des valeurs
+        Position2D valuePos = {
+            frame.x + padIn.x + valuePadX,
+            subtitlePosition.y + subtitleSize.y + c.subTitle.lineSpacing
+        };
+
+        float valuesHeight = 0.0f;
+        // Valeurs sur une ligne
+        for (const auto& v : c.values) {
+            Size2D vSize = MeasureTextStyled(v);
+            DrawTextStyled(v, valuePos);
+            valuesHeight = fmaxf(valuesHeight, vSize.y);
+
+            // On avance en X pour la prochaine valeur
+            valuePos.x += vSize.x + valuePadX;
+        }
+
+        // On descend pour le prochain InfoPanel
+        subtitlePosition.y = valuePos.y + valuesHeight + c.subTitle.lineSpacing;
     }
 }

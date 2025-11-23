@@ -51,18 +51,18 @@ bool Manager::init() {
 }
 
 const Font& Manager::getFont(FontID id, int size) {
-    int index = 0;
+    int bestIndex = 0;
+    int bestDiff = abs(FONT_SIZES[0] - size);
 
-    // Cherche la première taille >= size
-    for (int i = 0; i < FONT_SIZE_COUNT; ++i) {
-        if (FONT_SIZES[i] >= size) {
-            index = i;
-            break;
+    for (int i = 1; i < FONT_SIZE_COUNT; ++i) {
+        int diff = abs(FONT_SIZES[i] - size);
+        if (diff < bestDiff) {
+            bestDiff = diff;
+            bestIndex = i;
         }
-        index = i; // si aucune >= size, on garde la dernière
     }
 
-    return this->fmgr[id][index];
+    return this->fmgr[id][bestIndex];
 }
 
 Manager::~Manager() {

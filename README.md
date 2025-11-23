@@ -64,12 +64,12 @@ Avec exploit → vitesse augmentée → accès au texte.
 - Fixer la logique de déplacement (ZQSD, limites du monde, vitesse cohérente) non contrôlé par raylib pour avoir une vitesse contrôlable par exemple.
 - Première version du principe de l'application
 - Menu start/pause
+- Menu de settings
+- Ajouter un affichage debug de la vitesse, position etc... du joueur (pour voir que l’exploit marche bien).
 
 
 **Urgent**
-- Afficher un hud ou des informations dans le décor avec les commandes importantes
-- Ajouter un affichage debug de la vitesse, position etc... du joueur (pour voir que l’exploit marche bien).
-- Menu de settings (en cours)
+- Rendre le texte illisible en reverse
 - Faire un IHM pour l'exploit avec GTK
 
 
@@ -77,11 +77,12 @@ Avec exploit → vitesse augmentée → accès au texte.
 - Refaire le README propre avec explication de comment résoudre le challenge
 - Améliorer le monde (ajouter des collisions au bord, des objet etc...)
 - Gérer les collisions basiques (sol + quelques blocs).
-- Intégrer la gravité (chute, sol, éventuellement jump).
-- Rendre le texte illisible en reverse
+- Améliorer le menu settings (fps, touches...)
+- Afficher un hud ou des informations dans le décor avec les commandes importantes (je sais pas encore si il faut le faire, ça dépendra de si il y a plus que ZQSD en commandes)
 
 
 **Optionelle**
+- Intégrer la gravité (chute, sol, éventuellement jump).
 - Ajouter des assets sympas (sol, blocs, ciel, texture minimale).
 - Ajouter une petite UI (affichage instructions : "Atteins la plateforme en haut").
 - Ajouter du son (bruit de pas, petit son quand on atteint la zone) (pas sûr de ça).

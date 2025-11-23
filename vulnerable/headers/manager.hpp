@@ -8,12 +8,9 @@ using namespace std;
 
 // ---- Structure texture/font ----
 inline constexpr const char *INFO_FONT_PATH              = "assets/fonts/Inconsolata-Regular.ttf";
-inline constexpr const int   FONT_SIZE_COUNT             = 3;
-inline constexpr const int   FONT_SIZES[FONT_SIZE_COUNT] = { 20, 50, 120 };
+inline constexpr const int   FONT_SIZE_COUNT             = 4;
+inline constexpr const int   FONT_SIZES[FONT_SIZE_COUNT] = { 20, 30, 50, 120 };
 
-inline constexpr const int   SMALL_SIZE      = 20;
-inline constexpr const int   BIG_SIZE        = 50;
-inline constexpr const int   GIANT_SIZE      = 120;
 // ASCII + accents FR courants
 static const char32_t FR_CHARS[] = U" !\"#$%&'()*+,-./0123456789:;<=>?@°"
                                    U"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"

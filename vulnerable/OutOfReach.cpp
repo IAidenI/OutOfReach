@@ -11,6 +11,9 @@ int main() {
     while (!WindowShouldClose() && !game.shouldExit()) {
         game.tick();    // input + logique
         game.render();  // rendu
+
+        if (game.getHandCursor()) SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        else SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 
     return 0;
